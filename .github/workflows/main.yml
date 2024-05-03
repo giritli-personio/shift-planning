@@ -14,7 +14,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           name: spec
-          path: index.html
+          path: /
     
   deploy:
     needs: build
