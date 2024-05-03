@@ -9,12 +9,12 @@ jobs:
       - name: redoc-cli test
         uses: seeebiii/redoc-cli-github-action@v10
         with:
-          args: 'bundle spec.yaml'
+          args: 'bundle spec.yaml -o index.html'
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: spec
-          path: redoc-static.html
+          path: index.html
     
   deploy:
     needs: build
