@@ -1,0 +1,391 @@
+openapi: "3.0.0"
+info:
+  title: "Shift Planning API"
+  version: "0.1"
+  description: "This service that exposes an API for shift planning with integration partners"
+
+tags:
+  - name: "Employees"
+  - name: "Shifts"
+    description: "Grouped approved periods presented as shifts"
+  - name: "Periods"
+    description: "Approved periods of time that have been tracked for an employee"
+  - name: "Absences"
+    description: "Periods unrelated to tracked work periods. Absences, holiday, etc."
+
+paths:
+  /shifts:
+    get:
+      tags:
+        - Shifts
+      summary: "Retrieve all shifts within a given date range"
+      description: >-
+        - Returns a list of shifts within a given date range, ordered by newest first
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Shift"
+                  - $ref: "#/components/schemas/MetaObject"
+  /shifts/{shift_id}:
+    parameters:
+      - $ref: '#/components/parameters/shiftIdParam'
+    get:
+      tags:
+        - Shifts
+      summary: "Retrieve information about a specific shift"
+      description: >-
+        - Returns a shift for the provided ID
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Shift"
+                  - $ref: "#/components/schemas/MetaObject"
+  /employees/{employee_id}/periods:
+    parameters:
+      - $ref: '#/components/parameters/employeeIdParam'
+    get:
+      tags:
+        - Periods
+        - Employees
+      summary: "Retrieve all tracked time periods for a given employee"
+      description: >-
+        - Returns all periods associated with given employee ID
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Period"
+                  - $ref: "#/components/schemas/MetaObject"
+    post:
+      tags:
+        - Periods
+        - Employees
+      summary: "Create tracked time period for an employee"
+      description: >-
+        - Create tracked time period for a given employee iD
+        - Return new period entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePeriodRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/PeriodResponse"
+  /periods/{period_id}:
+    parameters:
+      - $ref: '#/components/parameters/periodIdParam'
+    patch:
+      tags:
+        - Periods
+      summary: "Update tracked time period for an employee"
+      description: >-
+        - Update tracked time period by given period ID
+        - Return updated period entity
+      responses:
+        "200":
+          $ref: "#/components/responses/PeriodResponse"
+    delete:
+      tags:
+        - Periods
+      summary: "Delete tracked time period for an employee"
+      description: >-
+        - Delete tracked time period for by given period ID
+      responses:
+        "204":
+          description: "Period was successfully deleted"
+  /employees/{employee_id}/absences:
+    parameters:
+      - $ref: '#/components/parameters/employeeIdParam'
+    get:
+      tags:
+        - Absences
+        - Employees
+      summary: "Retrieve absences for a given employee"
+      description: >-
+        - Retrieve absences associated with a given employee ID
+      parameters:
+        - name: "from"
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: "to"
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: "type"
+          in: query
+          schema:
+            $ref: '#/components/schemas/AbsenceTypeEnum'
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Absence"
+                  - $ref: "#/components/schemas/MetaObject"
+    post:
+      tags:
+        - Absences
+        - Employees
+      summary: "Create absence for employee"
+      description: >-
+        - Create absence by given employee ID
+        - Return new absence entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAbsenceRequest'
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Absence"
+                  - $ref: "#/components/schemas/MetaObject"
+  /absences/{absence_id}:
+    parameters:
+      - $ref: '#/components/parameters/absenceIdParam'
+    get:
+      tags:
+        - Absences
+      summary: "Retrieve absence for an employee"
+      description: >-
+        - Retrieve absense of an employee by given absence ID
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Absence"
+                  - $ref: "#/components/schemas/MetaObject"
+    patch:
+      tags:
+        - Absences
+      summary: "Update absence for an employee"
+      description: >-
+        - Update absence by given absence ID
+        - Return updated absence entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAbsenceRequest'
+      responses:
+        "200":
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Absence"
+                  - $ref: "#/components/schemas/MetaObject"
+    delete:
+      tags:
+        - Absences
+      summary: "Delete absence for employee"
+      description: >-
+        - Delete absence by given absence ID
+      responses:
+        "204":
+          description: "Absence was successfully deleted"
+components:
+  parameters:
+    absenceIdParam:
+      in: path
+      name: absence_id
+      required: true
+      schema:
+        type: integer
+    employeeIdParam:
+      in: path
+      name: employee_id
+      required: true
+      schema:
+        type: integer
+    periodIdParam:
+      in: path
+      name: period_id
+      required: true
+      schema:
+        type: integer
+    shiftIdParam:
+      in: path
+      name: shift_id
+      required: true
+      schema:
+        type: integer
+  schemas:
+    CreateAbsenceRequest:
+      title: Create Absence Request
+      description: >-
+        - Request object for creating new absence entity
+      allOf:
+        - $ref: "#/components/schemas/TimeRangeObject"
+        - $ref: "#/components/schemas/AbsenceTypeField"
+    CreatePeriodRequest:
+      title: Create Period Request
+      description: >-
+        - Request object for creating new period entity
+      allOf:
+        - $ref: "#/components/schemas/TimeRangeObject"
+        - $ref: "#/components/schemas/PeriodTypeField"
+    Shift:
+      description: >-
+        - Model of shift entity
+        - Describes a group of periods associated with an employee during a certain time range
+      allOf:
+        - $ref: "#/components/schemas/IdentifierField"
+        - $ref: "#/components/schemas/EmployeeIdentifierField"
+        - type: object
+          properties:
+            periods:
+              type: array
+              items:
+                $ref: "#/components/schemas/Period"
+        - $ref: "#/components/schemas/TimestampsObject"
+    Period:
+      description: >-
+        - Model of period entity
+        - Describes a period of work or break time associated with an employee
+      allOf:
+        - $ref: "#/components/schemas/IdentifierField"
+        - $ref: "#/components/schemas/EmployeeIdentifierField"
+        - $ref: "#/components/schemas/PeriodTypeField"
+        - $ref: "#/components/schemas/TimeRangeObject"
+        - $ref: "#/components/schemas/TimestampsObject"
+    Absence:
+      description: >-
+        - Model of absence entity
+        - Describes a period of absence or leave for an employee
+      allOf:
+        - $ref: "#/components/schemas/IdentifierField"
+        - $ref: "#/components/schemas/EmployeeIdentifierField"
+        - $ref: "#/components/schemas/AbsenceTypeField"
+        - $ref: "#/components/schemas/TimeRangeObject"
+        - $ref: "#/components/schemas/TimestampsObject"
+    AbsenceTypeEnum:
+      description: >-
+        - Enum of absence types
+      type: string
+      enum:
+        - sickness
+        - holiday
+        - bereavement
+    AbsenceTypeField:
+      description: >-
+        - Field definition of absence type
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AbsenceTypeEnum"
+    PeriodTypeEnum:
+      description: >-
+        - Enum of period types
+      type: string
+      enum:
+        - work
+        - break
+    PeriodTypeField:
+      description: >-
+        - Field definition of period types
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/PeriodTypeEnum"
+    IdentifierField:
+      description: >-
+        - Field definition of entity identifier
+      type: object
+      properties:
+        id:
+          type: integer
+    EmployeeIdentifierField:
+      description: >-
+        - Field definition of employee identifier
+      type: object
+      properties:
+        employee_id:
+          type: integer
+    TimeRangeObject:
+      description: >-
+        - Entity which represents a time range
+      type: object
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+    TimestampsObject:
+      description: >-
+        - Entity which represents common timestamps
+        - Date of creating, updating an entity
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    MetaObject:
+      description: "This object represents the metadata information for an object. It's a set of arbitrary key/value attributes such as `links`."
+      type: object
+      readOnly: true
+      properties:
+        _meta:
+          type: object
+          properties:
+            links:
+              type: object
+              additionalProperties:
+                type: string
+  responses:
+    PeriodResponse:
+      description: "Successful response"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Period"
+              - $ref: "#/components/schemas/MetaObject"
