@@ -10,6 +10,11 @@ jobs:
         uses: seeebiii/redoc-cli-github-action@v10
         with:
           args: 'bundle spec.yaml'
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec
+          path: redoc-static.html
     
   deploy:
     needs: build
@@ -29,4 +34,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          artifact_name: "redoc-static.html"
+          artifact_name: spec
