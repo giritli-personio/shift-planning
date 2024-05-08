@@ -5,11 +5,11 @@ info:
   description: "This service that exposes an API for shift planning with integration partners"
 
 tags:
-  - name: "Employees"
+  - name: "Persons"
   - name: "Shifts"
     description: "Grouped approved periods presented as shifts"
   - name: "Periods"
-    description: "Approved periods of time that have been tracked for an employee"
+    description: "Approved periods of time that have been tracked for an person"
   - name: "Absences"
     description: "Periods unrelated to tracked work periods. Absences, holiday, etc."
 
@@ -22,7 +22,7 @@ paths:
         - Persons
       summary: "Endpoints related to person entity"
       responses:
-        200:
+        "200":
           description: "Successful response"
   /shifts:
     get:
@@ -63,16 +63,15 @@ paths:
                 allOf:
                   - $ref: "#/components/schemas/Shift"
                   - $ref: "#/components/schemas/MetaObject"
-  /employees/{employee_id}/periods:
+  /periods:
     parameters:
-      - $ref: '#/components/parameters/employeeIdParam'
+      - $ref: '#/components/parameters/personIdParam'
     get:
       tags:
         - Periods
-        - Employees
-      summary: "Retrieve all tracked time periods for a given employee"
+      summary: "Retrieve all tracked time periods for a given person"
       description: >-
-        - Returns all periods associated with given employee ID
+        - Returns all periods associated with given person ID
       responses:
         "200":
           description: "Successful response"
@@ -90,10 +89,9 @@ paths:
     post:
       tags:
         - Periods
-        - Employees
-      summary: "Create tracked time period for an employee"
+      summary: "Create tracked time period for an person"
       description: >-
-        - Create tracked time period for a given employee iD
+        - Create tracked time period for a given person iD
         - Return new period entity
       requestBody:
         required: true
@@ -110,7 +108,7 @@ paths:
     patch:
       tags:
         - Periods
-      summary: "Update tracked time period for an employee"
+      summary: "Update tracked time period for an person"
       description: >-
         - Update tracked time period by given period ID
         - Return updated period entity
@@ -120,22 +118,21 @@ paths:
     delete:
       tags:
         - Periods
-      summary: "Delete tracked time period for an employee"
+      summary: "Delete tracked time period for an person"
       description: >-
         - Delete tracked time period for by given period ID
       responses:
         "204":
           description: "Period was successfully deleted"
-  /employees/{employee_id}/absences:
+  /absences:
     parameters:
-      - $ref: '#/components/parameters/employeeIdParam'
+      - $ref: '#/components/parameters/personIdParam'
     get:
       tags:
         - Absences
-        - Employees
-      summary: "Retrieve absences for a given employee"
+      summary: "Retrieve absences for a given person"
       description: >-
-        - Retrieve absences associated with a given employee ID
+        - Retrieve absences associated with a given person ID
       parameters:
         - name: "from"
           in: query
@@ -168,10 +165,9 @@ paths:
     post:
       tags:
         - Absences
-        - Employees
-      summary: "Create absence for employee"
+      summary: "Create absence for person"
       description: >-
-        - Create absence by given employee ID
+        - Create absence by given person ID
         - Return new absence entity
       requestBody:
         required: true
@@ -194,9 +190,9 @@ paths:
     get:
       tags:
         - Absences
-      summary: "Retrieve absence for an employee"
+      summary: "Retrieve absence for an person"
       description: >-
-        - Retrieve absense of an employee by given absence ID
+        - Retrieve absense of an person by given absence ID
       responses:
         "200":
           description: "Successful response"
@@ -209,7 +205,7 @@ paths:
     patch:
       tags:
         - Absences
-      summary: "Update absence for an employee"
+      summary: "Update absence for an person"
       description: >-
         - Update absence by given absence ID
         - Return updated absence entity
@@ -231,7 +227,7 @@ paths:
     delete:
       tags:
         - Absences
-      summary: "Delete absence for employee"
+      summary: "Delete absence for person"
       description: >-
         - Delete absence by given absence ID
       responses:
@@ -245,9 +241,9 @@ components:
       required: true
       schema:
         type: integer
-    employeeIdParam:
+    personIdParam:
       in: path
-      name: employee_id
+      name: person_id
       required: true
       schema:
         type: integer
@@ -281,10 +277,10 @@ components:
     Shift:
       description: >-
         - Model of shift entity
-        - Describes a group of periods associated with an employee during a certain time range
+        - Describes a group of periods associated with an person during a certain time range
       allOf:
         - $ref: "#/components/schemas/IdentifierField"
-        - $ref: "#/components/schemas/EmployeeIdentifierField"
+        - $ref: "#/components/schemas/PersonIdentifierField"
         - type: object
           properties:
             periods:
@@ -295,20 +291,20 @@ components:
     Period:
       description: >-
         - Model of period entity
-        - Describes a period of work or break time associated with an employee
+        - Describes a period of work or break time associated with an person
       allOf:
         - $ref: "#/components/schemas/IdentifierField"
-        - $ref: "#/components/schemas/EmployeeIdentifierField"
+        - $ref: "#/components/schemas/PersonIdentifierField"
         - $ref: "#/components/schemas/PeriodTypeField"
         - $ref: "#/components/schemas/TimeRangeObject"
         - $ref: "#/components/schemas/TimestampsObject"
     Absence:
       description: >-
         - Model of absence entity
-        - Describes a period of absence or leave for an employee
+        - Describes a period of absence or leave for an person
       allOf:
         - $ref: "#/components/schemas/IdentifierField"
-        - $ref: "#/components/schemas/EmployeeIdentifierField"
+        - $ref: "#/components/schemas/PersonIdentifierField"
         - $ref: "#/components/schemas/AbsenceTypeField"
         - $ref: "#/components/schemas/TimeRangeObject"
         - $ref: "#/components/schemas/TimestampsObject"
@@ -348,12 +344,12 @@ components:
       properties:
         id:
           type: integer
-    EmployeeIdentifierField:
+    PersonIdentifierField:
       description: >-
-        - Field definition of employee identifier
+        - Field definition of person identifier
       type: object
       properties:
-        employee_id:
+        person_id:
           type: integer
     TimeRangeObject:
       description: >-
