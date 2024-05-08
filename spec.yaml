@@ -14,6 +14,16 @@ tags:
     description: "Periods unrelated to tracked work periods. Absences, holiday, etc."
 
 paths:
+  /persons:
+    get:
+      externalDocs:
+        url: https://developer.personio.de/v2.0/reference/get_v2-persons
+      tags:
+        - Persons
+      summary: "Endpoints related to person entity"
+      responses:
+        200:
+          description: "Successful response"
   /shifts:
     get:
       tags:
