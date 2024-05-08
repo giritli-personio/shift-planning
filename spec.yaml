@@ -63,7 +63,7 @@ paths:
                 allOf:
                   - $ref: "#/components/schemas/Shift"
                   - $ref: "#/components/schemas/MetaObject"
-  /periods:
+  /persons/{person_id}/periods:
     parameters:
       - $ref: '#/components/parameters/personIdParam'
     get:
@@ -102,8 +102,9 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/PeriodResponse"
-  /periods/{period_id}:
+  /persons/{person_id}/periods/{period_id}:
     parameters:
+      - $ref: '#/components/parameters/personIdParam'
       - $ref: '#/components/parameters/periodIdParam'
     get:
       tags:
