@@ -105,6 +105,15 @@ paths:
   /periods/{period_id}:
     parameters:
       - $ref: '#/components/parameters/periodIdParam'
+    get:
+      tags:
+        - Periods
+      summary: "Retrieve tracked time period"
+      description: >-
+        - Retrive tracked time period by given period ID
+      responses:
+        "200":
+          $ref: "#/components/responses/PeriodResponse"
     patch:
       tags:
         - Periods
