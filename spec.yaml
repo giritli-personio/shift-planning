@@ -5,22 +5,10 @@ info:
   description: "This service that exposes an API for shift planning with integration partners"
 
 tags:
-  - name: "Persons"
-    description: "Endpoints related to person entity"
   - name: "Attendance"
     description: "Endpoints relating to the times that people work, and the rules that define this"
 
 paths:
-  /persons:
-    get:
-      description: "Retrieve information about a Person"
-      externalDocs:
-        url: https://developer.personio.de/v2.0/reference/get_v2-persons
-      tags:
-        - Persons
-      responses:
-        "200":
-          description: "Successful response"
   /persons/{person_id}/periods:
     parameters:
       - $ref: '#/components/parameters/personIdParam'
