@@ -30,6 +30,27 @@ paths:
       summary: "Retrieve all attendance periods for a given person"
       description: >-
         - Returns all periods associated with given person ID
+      parameters:
+        - in: query
+          name: type
+          schema:
+            $ref: '#/components/schemas/AttendancePeriodTypeEnum'
+          description: Filter by attendance period type
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/AttendancePeriodStatusEnum'
+          description: Filter by attendance period approval status
+        - in: query
+          name: from
+          description: Filter by attendance periods which start or end after a given date time
+          schema:
+            $ref: '#/components/schemas/DateTimeProperty'
+        - in: query
+          name: to
+          description: Filter by attendance periods which start or end before a given date time
+          schema:
+            $ref: '#/components/schemas/DateTimeProperty'
       responses:
         "200":
           description: "Successful response"
@@ -80,6 +101,12 @@ paths:
       description: >-
         - Update attendance period by given period ID
         - Return updated period entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchAttendancePeriodRequest"
       responses:
         "200":
           $ref: "#/components/responses/AttendancePeriodResponse"
@@ -147,6 +174,19 @@ components:
       allOf:
         - $ref: "#/components/schemas/TimeRangeObject"
         - $ref: "#/components/schemas/AttendancePeriodTypeField"
+        - $ref: "#/components/schemas/CommentObject"
+        - $ref: "#/components/schemas/SkipApprovalField"
+        - $ref: "#/components/schemas/ProjectIdField"
+    PatchAttendancePeriodRequest:
+      title: Update AttendancePeriod Request
+      description: >-
+        Request object for updating a period entity. Should only include fields which are intended to be updated.
+      allOf:
+        - $ref: "#/components/schemas/TimeRangeObject"
+        - $ref: "#/components/schemas/AttendancePeriodTypeField"
+        - $ref: "#/components/schemas/CommentObject"
+        - $ref: "#/components/schemas/SkipApprovalField"
+        - $ref: "#/components/schemas/ProjectIdField"
     AttendancePeriod:
       description: >-
         - Model of period entity
@@ -155,59 +195,100 @@ components:
         - $ref: "#/components/schemas/IdentifierField"
         - $ref: "#/components/schemas/PersonIdentifierField"
         - $ref: "#/components/schemas/AttendancePeriodTypeField"
+        - $ref: "#/components/schemas/AttendancePeriodStatusField"
         - $ref: "#/components/schemas/TimeRangeObject"
         - $ref: "#/components/schemas/TimestampsObject"
+        - $ref: "#/components/schemas/CommentObject"
+        - $ref: "#/components/schemas/ProjectIdField"
     AttendancePeriodTypeEnum:
       description: >-
-        - Enum of period types
+        - Enum of attendance period types
       type: string
       enum:
         - work
         - break
     AttendancePeriodTypeField:
       description: >-
-        - Field definition of period types
+        - Field definition of attendance period types
       type: object
       properties:
         type:
           $ref: "#/components/schemas/AttendancePeriodTypeEnum"
+    AttendancePeriodStatusEnum:
+      description: >-
+        - Enum of attendance period statuses
+      type: string
+      enum:
+        - pending
+        - approved
+        - rejected
+    AttendancePeriodStatusField:
+      description: >-
+        - Field definition of attendance period statuses
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/AttendancePeriodStatusEnum"
+    SkipApprovalField:
+      description: >-
+        - If true, set this period as approved and don't trigger an approval workflow in Personio
+      properties:
+        skipApproval:
+          type: boolean
+          nullable: true
+          default: false
+    ProjectIdField:
+      description: >-
+        - A project id to associate this attendance period with
+      properties:
+        project_id:
+          type: string
+          nullable: true
     IdentifierField:
       description: >-
         - Field definition of entity identifier
       type: object
       properties:
         id:
-          type: integer
+          type: string
     PersonIdentifierField:
       description: >-
         - Field definition of person identifier
       type: object
       properties:
         person_id:
-          type: integer
+          type: string
+
     # TODO do we need a timezone enabled and local time version of this?
+    DateTimeProperty:
+      description: Date time property
+      type: string
+      format: date-time
     TimeRangeObject:
       description: >-
         - Entity which represents a time range
       type: object
       properties:
         start:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/DateTimeProperty'
         end:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/DateTimeProperty'
     TimestampsObject:
       description: >-
         - Entity which represents a point in time
       type: object
       properties:
         created_at:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/DateTimeProperty'
         updated_at:
+          $ref: '#/components/schemas/DateTimeProperty'
+    CommentObject:
+      description: >-
+        - A general purpose comment about this entity
+      type: object
+      properties:
+        text:
           type: string
-          format: date-time
     MetaObject:
       description: "This object represents the metadata information for an object. It's a set of arbitrary key/value attributes such as `links`."
       type: object
