@@ -27,7 +27,7 @@ paths:
     get:
       tags:
         - Attendance
-      summary: "Retrieve all attendance periods for a given person"
+      summary: "Get all attendance periods for a given person"
       description: >-
         - Returns all periods associated with given person ID
       parameters:
@@ -88,7 +88,7 @@ paths:
     get:
       tags:
         - Attendance
-      summary: "Retrieve attendance period"
+      summary: "Get attendance period"
       description: >-
         - Retrive attendance period by given period ID
       responses:
@@ -121,7 +121,8 @@ paths:
           description: "AttendancePeriod was successfully deleted"
   /person/{person_id}/attendance-policies:
     get:
-      description: "Return current and upcoming attendance policies for an employee"
+      summary: "Get attendance policies for a person"
+      description: "Return current and upcoming attendance policies for a person"
       tags:
         - Attendance
       parameters:
