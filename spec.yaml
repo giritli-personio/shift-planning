@@ -6,70 +6,28 @@ info:
 
 tags:
   - name: "Persons"
-  - name: "Shifts"
-    description: "Grouped approved periods presented as shifts"
-  - name: "Periods"
-    description: "Approved periods of time that have been tracked for an person"
-  - name: "Absences"
-    description: "Periods unrelated to tracked work periods. Absences, holiday, etc."
+    description: "Endpoints related to person entity"
+  - name: "Attendance"
+    description: "Endpoints relating to the times that people work, and the rules that define this"
 
 paths:
   /persons:
     get:
+      description: "Retrieve information about a Person"
       externalDocs:
         url: https://developer.personio.de/v2.0/reference/get_v2-persons
       tags:
         - Persons
-      summary: "Endpoints related to person entity"
       responses:
         "200":
           description: "Successful response"
-  /shifts:
-    get:
-      tags:
-        - Shifts
-      summary: "Retrieve all shifts within a given date range"
-      description: >-
-        - Returns a list of shifts within a given date range, ordered by newest first
-      responses:
-        "200":
-          description: "Successful response"
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    properties:
-                      _data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Shift"
-                  - $ref: "#/components/schemas/MetaObject"
-  /shifts/{shift_id}:
-    parameters:
-      - $ref: '#/components/parameters/shiftIdParam'
-    get:
-      tags:
-        - Shifts
-      summary: "Retrieve information about a specific shift"
-      description: >-
-        - Returns a shift for the provided ID
-      responses:
-        "200":
-          description: "Successful response"
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Shift"
-                  - $ref: "#/components/schemas/MetaObject"
   /persons/{person_id}/periods:
     parameters:
       - $ref: '#/components/parameters/personIdParam'
     get:
       tags:
-        - Periods
-      summary: "Retrieve all tracked time periods for a given person"
+        - Attendance
+      summary: "Retrieve all attendance periods for a given person"
       description: >-
         - Returns all periods associated with given person ID
       responses:
@@ -84,173 +42,91 @@ paths:
                       _data:
                         type: array
                         items:
-                          $ref: "#/components/schemas/Period"
+                          $ref: "#/components/schemas/AttendancePeriod"
                   - $ref: "#/components/schemas/MetaObject"
     post:
       tags:
-        - Periods
-      summary: "Create tracked time period for an person"
+        - Attendance
+      summary: "Create attendance period for a person"
       description: >-
-        - Create tracked time period for a given person iD
+        - Create attendance period for a given person ID
         - Return new period entity
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreatePeriodRequest"
+              $ref: "#/components/schemas/CreateAttendancePeriodRequest"
       responses:
         "200":
-          $ref: "#/components/responses/PeriodResponse"
+          $ref: "#/components/responses/AttendancePeriodResponse"
   /persons/{person_id}/periods/{period_id}:
     parameters:
       - $ref: '#/components/parameters/personIdParam'
       - $ref: '#/components/parameters/periodIdParam'
     get:
       tags:
-        - Periods
-      summary: "Retrieve tracked time period"
+        - Attendance
+      summary: "Retrieve attendance period"
       description: >-
-        - Retrive tracked time period by given period ID
+        - Retrive attendance period by given period ID
       responses:
         "200":
-          $ref: "#/components/responses/PeriodResponse"
+          $ref: "#/components/responses/AttendancePeriodResponse"
     patch:
       tags:
-        - Periods
-      summary: "Update tracked time period for an person"
+        - Attendance
+      summary: "Update attendance period for a person"
       description: >-
-        - Update tracked time period by given period ID
+        - Update attendance period by given period ID
         - Return updated period entity
       responses:
         "200":
-          $ref: "#/components/responses/PeriodResponse"
+          $ref: "#/components/responses/AttendancePeriodResponse"
     delete:
       tags:
-        - Periods
-      summary: "Delete tracked time period for an person"
+        - Attendance
+      summary: "Delete attendance period for a person"
       description: >-
-        - Delete tracked time period for by given period ID
+        - Delete attendance period for by given period ID
       responses:
         "204":
-          description: "Period was successfully deleted"
-  /absences:
-    parameters:
-      - $ref: '#/components/parameters/personIdParam'
+          description: "AttendancePeriod was successfully deleted"
+  /person/{person_id}/attendance-policies:
     get:
+      description: "Return current and upcoming attendance policies for an employee"
       tags:
-        - Absences
-      summary: "Retrieve absences for a given person"
-      description: >-
-        - Retrieve absences associated with a given person ID
+        - Attendance
       parameters:
-        - name: "from"
-          in: query
+        - $ref: '#/components/parameters/personIdParam'
+        - in: query
+          name: time_range
+          required: false
+          description: |
+            If present, restrict policies to those which apply within this time range.
+            If missing, only the current policy will be returned.
+            Historical policies are not returned, and
           schema:
-            type: string
-            format: date-time
-        - name: "to"
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: "type"
-          in: query
-          schema:
-            $ref: '#/components/schemas/AbsenceTypeEnum'
+            $ref: "#/components/schemas/TimeRangeObject"
       responses:
         "200":
-          description: "Successful response"
+          description: "OK"
           content:
             application/json:
               schema:
                 allOf:
-                  - type: object
-                    properties:
-                      _data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Absence"
-                  - $ref: "#/components/schemas/MetaObject"
-    post:
-      tags:
-        - Absences
-      summary: "Create absence for person"
-      description: >-
-        - Create absence by given person ID
-        - Return new absence entity
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateAbsenceRequest'
-      responses:
-        "200":
-          description: "Successful response"
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Absence"
-                  - $ref: "#/components/schemas/MetaObject"
-  /absences/{absence_id}:
-    parameters:
-      - $ref: '#/components/parameters/absenceIdParam'
-    get:
-      tags:
-        - Absences
-      summary: "Retrieve absence for an person"
-      description: >-
-        - Retrieve absense of an person by given absence ID
-      responses:
-        "200":
-          description: "Successful response"
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Absence"
-                  - $ref: "#/components/schemas/MetaObject"
-    patch:
-      tags:
-        - Absences
-      summary: "Update absence for an person"
-      description: >-
-        - Update absence by given absence ID
-        - Return updated absence entity
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateAbsenceRequest'
-      responses:
-        "200":
-          description: "Successful response"
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Absence"
-                  - $ref: "#/components/schemas/MetaObject"
-    delete:
-      tags:
-        - Absences
-      summary: "Delete absence for person"
-      description: >-
-        - Delete absence by given absence ID
-      responses:
-        "204":
-          description: "Absence was successfully deleted"
+                - type: object
+                  properties:
+                    _data:
+                      type: array
+                      description: |
+                        Attendance policies in ascending chronological order. The first element is guaranteed to be the
+                        policy that is in force at the start of the time range.
+                      items:
+                        $ref: "#/components/schemas/AttendancePolicy"
+                - $ref: "#/components/schemas/MetaObject"
 components:
   parameters:
-    absenceIdParam:
-      in: path
-      name: absence_id
-      required: true
-      schema:
-        type: integer
     personIdParam:
       in: path
       name: person_id
@@ -262,91 +138,39 @@ components:
       name: period_id
       required: true
       schema:
-        type: integer
-    shiftIdParam:
-      in: path
-      name: shift_id
-      required: true
-      schema:
-        type: integer
+        type: string
   schemas:
-    CreateAbsenceRequest:
-      title: Create Absence Request
-      description: >-
-        - Request object for creating new absence entity
-      allOf:
-        - $ref: "#/components/schemas/TimeRangeObject"
-        - $ref: "#/components/schemas/AbsenceTypeField"
-    CreatePeriodRequest:
-      title: Create Period Request
+    CreateAttendancePeriodRequest:
+      title: Create AttendancePeriod Request
       description: >-
         - Request object for creating new period entity
       allOf:
         - $ref: "#/components/schemas/TimeRangeObject"
-        - $ref: "#/components/schemas/PeriodTypeField"
-    Shift:
-      description: >-
-        - Model of shift entity
-        - Describes a group of periods associated with an person during a certain time range
-      allOf:
-        - $ref: "#/components/schemas/IdentifierField"
-        - $ref: "#/components/schemas/PersonIdentifierField"
-        - type: object
-          properties:
-            periods:
-              type: array
-              items:
-                $ref: "#/components/schemas/Period"
-        - $ref: "#/components/schemas/TimestampsObject"
-    Period:
+        - $ref: "#/components/schemas/AttendancePeriodTypeField"
+    AttendancePeriod:
       description: >-
         - Model of period entity
-        - Describes a period of work or break time associated with an person
+        - Describes a period of work or break time associated with a person
       allOf:
         - $ref: "#/components/schemas/IdentifierField"
         - $ref: "#/components/schemas/PersonIdentifierField"
-        - $ref: "#/components/schemas/PeriodTypeField"
+        - $ref: "#/components/schemas/AttendancePeriodTypeField"
         - $ref: "#/components/schemas/TimeRangeObject"
         - $ref: "#/components/schemas/TimestampsObject"
-    Absence:
-      description: >-
-        - Model of absence entity
-        - Describes a period of absence or leave for an person
-      allOf:
-        - $ref: "#/components/schemas/IdentifierField"
-        - $ref: "#/components/schemas/PersonIdentifierField"
-        - $ref: "#/components/schemas/AbsenceTypeField"
-        - $ref: "#/components/schemas/TimeRangeObject"
-        - $ref: "#/components/schemas/TimestampsObject"
-    AbsenceTypeEnum:
-      description: >-
-        - Enum of absence types
-      type: string
-      enum:
-        - sickness
-        - holiday
-        - bereavement
-    AbsenceTypeField:
-      description: >-
-        - Field definition of absence type
-      type: object
-      properties:
-        type:
-          $ref: "#/components/schemas/AbsenceTypeEnum"
-    PeriodTypeEnum:
+    AttendancePeriodTypeEnum:
       description: >-
         - Enum of period types
       type: string
       enum:
         - work
         - break
-    PeriodTypeField:
+    AttendancePeriodTypeField:
       description: >-
         - Field definition of period types
       type: object
       properties:
         type:
-          $ref: "#/components/schemas/PeriodTypeEnum"
+          $ref: "#/components/schemas/AttendancePeriodTypeEnum"
     IdentifierField:
       description: >-
         - Field definition of entity identifier
@@ -361,6 +185,7 @@ components:
       properties:
         person_id:
           type: integer
+    # TODO do we need a timezone enabled and local time version of this?
     TimeRangeObject:
       description: >-
         - Entity which represents a time range
@@ -374,8 +199,7 @@ components:
           format: date-time
     TimestampsObject:
       description: >-
-        - Entity which represents common timestamps
-        - Date of creating, updating an entity
+        - Entity which represents a point in time
       type: object
       properties:
         created_at:
@@ -396,12 +220,34 @@ components:
               type: object
               additionalProperties:
                 type: string
+    AttendancePolicy:
+      type: "object"
+      description: |
+        Policy details which indicate constraints around the time that a person may work
+      properties:
+        since:
+          type: string
+          format: date-time
+          nullable: false
+          description: Time when this policy first applied. This may be in the past
+        weekly_working_hours:
+          type: integer
+          nullable: true
+          description: Expected number of working hours that this person should track in a week, excluding any holiday, absence or leave
+        max_hours_per_day:
+          type: integer
+          nullable: true
+          description: Maximum number of hours that this person may track as work in a 24h period
+        minimum_break_duration_mins:
+          type: integer
+          nullable: true
+          description: Minimum duration of any break that this person may track
   responses:
-    PeriodResponse:
+    AttendancePeriodResponse:
       description: "Successful response"
       content:
         application/json:
           schema:
             allOf:
-              - $ref: "#/components/schemas/Period"
+              - $ref: "#/components/schemas/AttendancePeriod"
               - $ref: "#/components/schemas/MetaObject"
