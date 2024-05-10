@@ -126,6 +126,8 @@ paths:
             Historical policies are not returned, and
           schema:
             $ref: "#/components/schemas/TimeRangeObject"
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursor'
       responses:
         "200":
           description: "OK"
