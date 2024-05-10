@@ -39,6 +39,8 @@ paths:
           description: Filter by attendance periods which start or end before a given date time
           schema:
             $ref: '#/components/schemas/DateTimeProperty'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/cursor'
       responses:
         "200":
           description: "Successful response"
@@ -155,6 +157,26 @@ components:
       required: true
       schema:
         type: string
+    limit:
+      in: query
+      name: limit
+      description: "The amount of resources to be returned per one request. It can range between 1 and 50, and the default is 10."
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 10
+    cursor:
+      in: query
+      name: cursor
+      description: |
+        The pagination cursor to navigate over to the next list of resources. If you pass a specific limit
+        to your request, or you rely on the default value of the number of resources to be returned, then 
+        your subsequent call has to include the cursor in order to retrieve the next list of resources. 
+        If cursor is missing, the first page is returned.
+      schema:
+        type: string
+        example: "cur_82sQwR2eZvKilo2duNh219Kw"
   schemas:
     CreateAttendancePeriodRequest:
       title: Create AttendancePeriod Request
