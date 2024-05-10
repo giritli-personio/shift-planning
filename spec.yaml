@@ -142,16 +142,16 @@ paths:
             application/json:
               schema:
                 allOf:
-                - type: object
-                  properties:
-                    _data:
-                      type: array
-                      description: |
-                        Attendance policies in ascending chronological order. The first element is guaranteed to be the
-                        policy that is in force at the start of the time range.
-                      items:
-                        $ref: "#/components/schemas/AttendancePolicy"
-                - $ref: "#/components/schemas/MetaObject"
+                  - type: object
+                    properties:
+                      _data:
+                        type: array
+                        description: |
+                          Attendance policies in ascending chronological order. The first element is guaranteed to be the
+                          policy that is in force at the start of the time range.
+                        items:
+                          $ref: "#/components/schemas/AttendancePolicy"
+                  - $ref: "#/components/schemas/MetaObject"
 components:
   parameters:
     personIdParam:
@@ -244,6 +244,7 @@ components:
         project_id:
           type: string
           nullable: true
+          example: "82173"
     IdentifierField:
       description: >-
         - Field definition of entity identifier
@@ -251,6 +252,7 @@ components:
       properties:
         id:
           type: string
+          example: "1234"
     PersonIdentifierField:
       description: >-
         - Field definition of person identifier
@@ -258,6 +260,7 @@ components:
       properties:
         person_id:
           type: string
+          example: "5678"
 
     # TODO do we need a timezone enabled and local time version of this?
     DateTimeProperty:
@@ -287,8 +290,9 @@ components:
         - A general purpose comment about this entity
       type: object
       properties:
-        text:
+        comment:
           type: string
+          example: "An example comment"
     MetaObject:
       description: "This object represents the metadata information for an object. It's a set of arbitrary key/value attributes such as `links`."
       type: object
@@ -305,24 +309,27 @@ components:
       type: "object"
       description: |
         Policy details which indicate constraints around the time that a person may work
-      properties:
-        since:
-          type: string
-          format: date-time
-          nullable: false
-          description: Time when this policy first applied. This may be in the past
-        weekly_working_hours:
-          type: integer
-          nullable: true
-          description: Expected number of working hours that this person should track in a week, excluding any holiday, absence or leave
-        max_hours_per_day:
-          type: integer
-          nullable: true
-          description: Maximum number of hours that this person may track as work in a 24h period
-        minimum_break_duration_mins:
-          type: integer
-          nullable: true
-          description: Minimum duration of any break that this person may track
+      allOf:
+        - $ref: "#/components/schemas/IdentifierField"
+        - type: object
+          properties:
+            since:
+              allOf:
+                - $ref: '#/components/schemas/DateTimeProperty'
+                - nullable: false
+                - description: Time when this policy first applied. This may be in the past
+            weekly_working_hours:
+              type: integer
+              nullable: true
+              description: Expected number of working hours that this person should track in a week, excluding any holiday, absence or leave
+            max_hours_per_day:
+              type: integer
+              nullable: true
+              description: Maximum number of hours that this person may track as work in a 24h period
+            minimum_break_duration_mins:
+              type: integer
+              nullable: true
+              description: Minimum duration of any break that this person may track
   responses:
     AttendancePeriodResponse:
       description: "Successful response"
