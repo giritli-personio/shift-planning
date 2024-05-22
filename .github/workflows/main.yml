@@ -7,9 +7,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build Redoc
-        uses: seeebiii/redoc-cli-github-action@v10
+        uses: fluximus-prime/redocly-cli-github-action@v1.0.2
         with:
-          args: 'bundle spec.yaml -o out/index.html'
+          args: 'build-docs spec.yaml --output out/index.html'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
