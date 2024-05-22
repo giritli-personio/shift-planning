@@ -30,9 +30,9 @@ paths:
         beta: true
       tags:
         - Attendance
-      summary: "Get all attendance periods for a given person"
+      summary: "Get all attendance periods"
       description: >-
-        - Returns all periods associated with given person ID
+        - Returns all attendance periods and can be filtered by person ID.
       parameters:
         - $ref: '#/components/parameters/personIdListParam'
         - in: query
@@ -91,7 +91,7 @@ paths:
           - personio:attendances:write
       tags:
         - Attendance
-      summary: "Create attendance period for a person"
+      summary: "Create attendance periods"
       description: >-
         - Create attendance periods.
         - Return newly created attendance periods.
@@ -161,7 +161,7 @@ paths:
           - personio:attendances:write
       tags:
         - Attendance
-      summary: "Update attendance period for a person"
+      summary: "Update attendance period"
       description: >-
         - Updates an attendance period by given attendance period ID
         - Returns updated attendance period
@@ -194,7 +194,7 @@ paths:
           - personio:attendances:write
       tags:
         - Attendance
-      summary: "Delete attendance period for a person"
+      summary: "Delete attendance period"
       description: >-
         - Deletes an attendance period for by given attendance period ID
       responses:
