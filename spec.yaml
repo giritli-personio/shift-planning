@@ -1,24 +1,40 @@
+---
+
 openapi: "3.0.0"
 info:
-  title: "Shift Planning API"
+  title: "Attendances API"
   version: "0.1"
-  description: "This service that exposes an API for shift planning with integration partners"
+  description: "This service that exposes an API for attendances with integration partners"
+  x-papi-meta:
+    audience: PUBLIC
+  x-papi-version: 2.1.0
+  x-papi-gateway:
+    service-url: http://attendances
+    scopes:
+      - name: personio:attendances:read
+        description: Read access to Attendance Periods.
+        models:
+          - AttendancePeriod
+
+servers:
+  - url: https://api.personio.de
 
 tags:
   - name: "Attendance"
     description: "Endpoints relating to the times that people work, and the rules that define this"
 
 paths:
-  /persons/{person_id}/periods:
-    parameters:
-      - $ref: '#/components/parameters/personIdParam'
+  /attendance-periods:
     get:
+      x-papi-meta:
+        beta: true
       tags:
         - Attendance
       summary: "Get all attendance periods for a given person"
       description: >-
         - Returns all periods associated with given person ID
       parameters:
+        - $ref: '#/components/parameters/personIdListParam'
         - in: query
           name: type
           schema:
@@ -55,13 +71,30 @@ paths:
                         items:
                           $ref: "#/components/schemas/AttendancePeriod"
                   - $ref: "#/components/schemas/MetaObject"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowedResponse"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntityResponse"
     post:
+      x-papi-meta:
+        beta: true
+      x-papi-security:
+        scopes:
+          - personio:attendances:write
       tags:
         - Attendance
       summary: "Create attendance period for a person"
       description: >-
-        - Create attendance period for a given person ID
-        - Return new period entity
+        - Create attendance periods.
+        - Return newly created attendance periods.
       requestBody:
         required: true
         content:
@@ -70,27 +103,68 @@ paths:
               $ref: "#/components/schemas/CreateAttendancePeriodRequest"
       responses:
         "200":
-          $ref: "#/components/responses/AttendancePeriodResponse"
-  /persons/{person_id}/periods/{period_id}:
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      _data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/AttendancePeriod"
+                  - $ref: "#/components/schemas/MetaObject"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowedResponse"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntityResponse"
+  /attendance-periods/{period_id}:
     parameters:
-      - $ref: '#/components/parameters/personIdParam'
       - $ref: '#/components/parameters/periodIdParam'
     get:
+      x-papi-meta:
+        beta: true
       tags:
         - Attendance
       summary: "Get attendance period"
       description: >-
-        - Retrive attendance period by given period ID
+        - Retrieves an attendance period by given attendance period ID
       responses:
         "200":
           $ref: "#/components/responses/AttendancePeriodResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowedResponse"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntityResponse"
     patch:
+      x-papi-meta:
+        beta: true
+      x-papi-security:
+        scopes:
+          - personio:attendances:write
       tags:
         - Attendance
       summary: "Update attendance period for a person"
       description: >-
-        - Update attendance period by given period ID
-        - Return updated period entity
+        - Updates an attendance period by given attendance period ID
+        - Returns updated attendance period
       requestBody:
         required: true
         content:
@@ -100,51 +174,38 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/AttendancePeriodResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowedResponse"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntityResponse"
     delete:
+      x-papi-meta:
+        beta: true
+      x-papi-security:
+        scopes:
+          - personio:attendances:write
       tags:
         - Attendance
       summary: "Delete attendance period for a person"
       description: >-
-        - Delete attendance period for by given period ID
+        - Deletes an attendance period for by given attendance period ID
       responses:
         "204":
           description: "AttendancePeriod was successfully deleted"
-  /person/{person_id}/attendance-policies:
-    get:
-      summary: "Get attendance policies for a person"
-      description: "Return current and upcoming attendance policies for a person"
-      tags:
-        - Attendance
-      parameters:
-        - $ref: '#/components/parameters/personIdParam'
-        - in: query
-          name: time_range
-          required: false
-          description: |
-            If present, restrict policies to those which apply within this time range.
-            If missing, only the current policy will be returned.
-            Historical policies are not returned, and
-          schema:
-            $ref: "#/components/schemas/TimeRangeObject"
-        - $ref: '#/components/parameters/limit'
-        - $ref: '#/components/parameters/cursor'
-      responses:
-        "200":
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    properties:
-                      _data:
-                        type: array
-                        description: |
-                          Attendance policies in ascending chronological order. The first element is guaranteed to be the
-                          policy that is in force at the start of the time range.
-                        items:
-                          $ref: "#/components/schemas/AttendancePolicy"
-                  - $ref: "#/components/schemas/MetaObject"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
 components:
   parameters:
     personIdParam:
@@ -153,6 +214,26 @@ components:
       required: true
       schema:
         type: integer
+    personIdListParam:
+      name: person_id
+      in: query
+      description: >-
+        - Comma separated list of person_id to filter results by
+      schema:
+        type: array
+        minItems: 1
+        maxItems: 10
+        items:
+          type: string
+      style: form
+      explode: false
+      examples:
+        oneId:
+          summary: Example of a single ID
+          value: ["person_id_1"]
+        multipleIds:
+          summary: Example of multiple IDs
+          value: ["person_id_2", "person_id_3", "person_id_4"]
     periodIdParam:
       in: path
       name: period_id
@@ -173,8 +254,8 @@ components:
       name: cursor
       description: |
         The pagination cursor to navigate over to the next list of resources. If you pass a specific limit
-        to your request, or you rely on the default value of the number of resources to be returned, then 
-        your subsequent call has to include the cursor in order to retrieve the next list of resources. 
+        to your request, or you rely on the default value of the number of resources to be returned, then
+        your subsequent call has to include the cursor in order to retrieve the next list of resources.
         If cursor is missing, the first page is returned.
       schema:
         type: string
@@ -183,13 +264,18 @@ components:
     CreateAttendancePeriodRequest:
       title: Create AttendancePeriod Request
       description: >-
-        - Request object for creating new period entity
-      allOf:
-        - $ref: "#/components/schemas/TimeRangeObject"
-        - $ref: "#/components/schemas/AttendancePeriodTypeField"
-        - $ref: "#/components/schemas/CommentObject"
-        - $ref: "#/components/schemas/SkipApprovalField"
-        - $ref: "#/components/schemas/ProjectIdField"
+        - Request object for creating new attendance period
+      type: array
+      minItems: 1
+      maxItems: 10
+      items:
+        allOf:
+          - $ref: '#/components/schemas/PersonIdentifierField'
+          - $ref: "#/components/schemas/TimeRangeObject"
+          - $ref: "#/components/schemas/AttendancePeriodTypeField"
+          - $ref: "#/components/schemas/CommentObject"
+          - $ref: "#/components/schemas/SkipApprovalField"
+          - $ref: "#/components/schemas/ProjectIdField"
     PatchAttendancePeriodRequest:
       title: Update AttendancePeriod Request
       description: >-
@@ -215,11 +301,13 @@ components:
         - $ref: "#/components/schemas/ProjectIdField"
     AttendancePeriodTypeEnum:
       description: >-
-        - Enum of attendance period types
+        - Possible attendance period types
+        * `WORK` - Attendance period representing working time
+        * `BREAK` - Attendance period representing break time
       type: string
       enum:
-        - work
-        - break
+        - WORK
+        - BREAK
     AttendancePeriodTypeField:
       description: >-
         - Field definition of attendance period types
@@ -229,7 +317,10 @@ components:
           $ref: "#/components/schemas/AttendancePeriodTypeEnum"
     AttendancePeriodStatusEnum:
       description: >-
-        - Enum of attendance period statuses
+        - Possible attendance period statuses
+        * `pending` - Attendance periods that are pending approval or rejection
+        * `approved` - Attendance periods that have been approved
+        * `rejected` - Attendance periods that have been rejected
       type: string
       enum:
         - pending
@@ -246,7 +337,7 @@ components:
       description: >-
         - If true, set this period as approved and don't trigger an approval workflow in Personio
       properties:
-        skipApproval:
+        skip_approval:
           type: boolean
           nullable: true
           default: false
@@ -273,9 +364,8 @@ components:
       properties:
         person_id:
           type: string
+          maxLength: 40
           example: "5678"
-
-    # TODO do we need a timezone enabled and local time version of this?
     DateTimeProperty:
       description: Date time property
       type: string
@@ -305,6 +395,7 @@ components:
       properties:
         comment:
           type: string
+          maxLength: 200
           example: "An example comment"
     MetaObject:
       description: "This object represents the metadata information for an object. It's a set of arbitrary key/value attributes such as `links`."
@@ -318,31 +409,6 @@ components:
               type: object
               additionalProperties:
                 type: string
-    AttendancePolicy:
-      type: "object"
-      description: |
-        Policy details which indicate constraints around the time that a person may work
-      allOf:
-        - $ref: "#/components/schemas/IdentifierField"
-        - type: object
-          properties:
-            since:
-              allOf:
-                - $ref: '#/components/schemas/DateTimeProperty'
-                - nullable: false
-                - description: Time when this policy first applied. This may be in the past
-            weekly_working_hours:
-              type: integer
-              nullable: true
-              description: Expected number of working hours that this person should track in a week, excluding any holiday, absence or leave
-            max_hours_per_day:
-              type: integer
-              nullable: true
-              description: Maximum number of hours that this person may track as work in a 24h period
-            minimum_break_duration_mins:
-              type: integer
-              nullable: true
-              description: Minimum duration of any break that this person may track
   responses:
     AttendancePeriodResponse:
       description: "Successful response"
@@ -352,3 +418,81 @@ components:
             allOf:
               - $ref: "#/components/schemas/AttendancePeriod"
               - $ref: "#/components/schemas/MetaObject"
+    BadRequestResponse:
+      description: Bad request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "https://raw.githubusercontent.com/personio/api-docs/master/common-components-v2.json#/components/schemas/ErrorResponse"
+          example:
+            personio_trace_id: "aswo3f-a202lfso-312123sld-1230ddd"
+            timestamp: "2021-05-28T11:17:30+00:00"
+            errors:
+              - title: "Bad request"
+                detail: "Provided request parameters are invalid."
+                type: "https://developer.personio.de/reference/errors#common.bad_request"
+    UnauthorizedResponse:
+      description: Unauthorized
+      content:
+        application/problem+json:
+          schema:
+            $ref: "https://raw.githubusercontent.com/personio/api-docs/master/common-components-v2.json#/components/schemas/ErrorResponse"
+          example:
+            personio_trace_id: "aswo3f-a202lfso-312123sld-1230ddd"
+            timestamp: "2021-05-28T11:17:30+00:00"
+            errors:
+              - title: "Unauthorized"
+                detail: "Authentication is required and has failed."
+                type: "https://developer.personio.de/reference/errors#common.unauthorized"
+    ForbiddenResponse:
+      description: Forbidden
+      content:
+        application/problem+json:
+          schema:
+            $ref: "https://raw.githubusercontent.com/personio/api-docs/master/common-components-v2.json#/components/schemas/ErrorResponse"
+          example:
+            personio_trace_id: "aswo3f-a202lfso-312123sld-1230ddd"
+            timestamp: "2021-05-28T11:17:30+00:00"
+            errors:
+              - title: "Forbidden"
+                detail: "You do not have permission to access this resource."
+                type: "https://developer.personio.de/reference/errors#common.forbidden"
+    NotFoundResponse:
+      description: Not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "https://raw.githubusercontent.com/personio/api-docs/master/common-components-v2.json#/components/schemas/ErrorResponse"
+          example:
+            personio_trace_id: "aswo3f-a202lfso-312123sld-1230ddd"
+            timestamp: "2021-05-28T11:17:30+00:00"
+            errors:
+              - title: "Resource not found"
+                detail: "The requested resource could not be found."
+                type: "https://developer.personio.de/reference/errors#common.not_found"
+    MethodNotAllowedResponse:
+      description: Method not allowed
+      content:
+        application/problem+json:
+          schema:
+            $ref: "https://raw.githubusercontent.com/personio/api-docs/master/common-components-v2.json#/components/schemas/ErrorResponse"
+          example:
+            personio_trace_id: "aswo3f-a202lfso-312123sld-1230ddd"
+            timestamp: "2021-05-28T11:17:30+00:00"
+            errors:
+              - title: "Method not allowed"
+                detail: "The HTTP method used is not supported for this endpoint."
+                type: "https://developer.personio.de/reference/errors#common.method_not_allowed"
+    UnprocessableEntityResponse:
+      description: Unprocessable entity
+      content:
+        application/problem+json:
+          schema:
+            $ref: "https://raw.githubusercontent.com/personio/api-docs/master/common-components-v2.json#/components/schemas/ErrorResponse"
+          example:
+            personio_trace_id: "aswo3f-a202lfso-312123sld-1230ddd"
+            timestamp: "2021-05-28T11:17:30+00:00"
+            errors:
+              - title: "Unprocessable entity"
+                detail: "The request was well-formed but was unable to be followed due to semantic errors."
+                type: "https://developer.personio.de/reference/errors#common.unprocessable_entity"
