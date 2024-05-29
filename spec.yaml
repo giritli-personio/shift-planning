@@ -97,7 +97,7 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateAttendancePeriodRequest"
       responses:
-        "200":
+        "201":
           description: "Successful response"
           content:
             application/json:
